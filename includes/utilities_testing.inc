@@ -30,10 +30,7 @@ function islandora_scholar_get_view(AbstractObject $object) {
     'preview' => array(
       '#weight' => $i++,
     ),
-    'pdf_download' => array(
-      '#weight' => $i++,
-    ),
-    'dataset_download' => array(
+    'OBJ_download' => array(
       '#weight' => $i++,
     ),
     'metadata' => islandora_scholar_get_metadata_display($object, $i++),
@@ -89,9 +86,9 @@ function islandora_scholar_get_view(AbstractObject $object) {
     $image = theme('image', array(
         'path' => "islandora/object/$object->id/datastream/PREVIEW/view",
       ));
-    if (isset($object['PDF']) && islandora_datastream_access(ISLANDORA_VIEW_OBJECTS, $object['PDF'])) {
+    if (isset($object['OBJ']) && islandora_datastream_access(ISLANDORA_VIEW_OBJECTS, $object['OBJ'])) {
       $display['preview'] = array(
-        '#markup' => l($image, "islandora/object/$object->id/datastream/PDF/view", array(
+        '#markup' => l($image, "islandora/object/$object->id/datastream/OBJ/view", array(
             'html' => TRUE,
           )),
         '#weight' => $display['preview']['#weight'],
@@ -106,60 +103,12 @@ function islandora_scholar_get_view(AbstractObject $object) {
     }
   }
 
-  if (isset($object['PDF']) && islandora_datastream_access(ISLANDORA_VIEW_OBJECTS, $object['PDF'])) {
-    $display['pdf_download'] = array(
+  if (isset($object['OBJ']) && islandora_datastream_access(ISLANDORA_VIEW_OBJECTS, $object['OBJ'])) {
+    $display['OBJ_download'] = array(
       '#type' => 'item',
-      '#title' => t('<b>Downloads</b>'),
-      '#markup' => l(t('Readme'), "islandora/object/$object->id/datastream/PDF/download/citation.pdf"),
-      '#weight' => $display['pdf_download']['#weight'],
-    );
-  }
-  if (isset($object['DATACITE']) && islandora_datastream_access(ISLANDORA_VIEW_OBJECTS, $object['DATACITE'])) {
-      /*    $datacite_xml = simplexml_load_string($object['DATACITE']->content);
-      */
-      /* $test_xml->registerXPathNamespace('mods', 'http://www.loc.gov/mods/v3'); */
-      /*
-      $test_datacite_link = $datacite_xml->query('//alternateIdentifiers/alternateIdentifier[@alternateIdentifierType="URL"]'); 
-      $datacite_str = trim($object['DATACITE']->content);
-  $datacite_str = trim($object['DATACITE']->content);
-      */
-  $datacite_str = trim($object['DC']->content);
-  $datacite_doc = new DOMDocument();
-  $datacite_doc->loadXML($datacite_str);
-  $datacite_xpath = new DOMXPath($datacite_doc);
-  $namespace = 'http://www.openarchives.org/OAI/2.0/oai_dc/';
-  $datacite_namespace = 'http://datacite.org/schema/kernel-3';
-  $datacite_xpath->registerNamespace('dc', $namespace);
-  #$test_datacite_link = $datacite_xpath->query('//alternateIdentifiers/alternateIdentifier[@alternateIdentifierType="URL"]');
-  $test_datacite_link = $datacite_xpath->query('//dc:identifier'); 
-
-/*
-  $datacite_url = $test_datacite_link->item(0)->textContent;   #does not work with following line
-  drupal_set_message(print($datacite_url)); 
-
-  var_dump($test_datacite_link);
-  drupal_set_message(sprintf('<pre>%s</pre>', print_r($test_datacite_link, TRUE)));
-drupal_set_message(print_r($test_datacite_link->saveXML()));   #does not work
-echo $datacite_doc->saveXML();  #does not work 
-drupal_set_message(print_r($test_datacite_link));  #does not work
-drupal_set_message(print_r($datacite_doc->saveXML()));  #works
-  drupal_set_message(print($datacite_url));
-
-*/
-
-  $datacite_url_contents = $test_datacite_link->item(0)->textContent;   
-  /*   var_dump($datacite_url_contents); */
-  
-  $datacite_url = str_replace("url:", "", $datacite_url_contents );
-  /*  var_dump($datacite_url);  */
-
-  $display['dataset_download'] = array(
-      '#type' => 'item',
-/*
-      '#markup' => l(t('Dataset'), "islandora/object/$object->id/datastream/DATACITE/download/datacite.xml"),
-*/
-      '#markup' => l(t('Dataset'), "$datacite_url"),
-      '#weight' => $display['dataset_download']['#weight'],
+      '#title' => t('Download Dataset'),
+      '#markup' => l(t('This Links to UW PetaLibrary'), "islandora/$object->id/datastream/OBJ/"),
+      '#weight' => $display['OBJ_download']['#weight'],
     );
   }
   return array('citation.tab' => $display);
@@ -176,9 +125,9 @@ function islandora_scholar_get_ingest_steps() {
     'islandora_scholar_file_upload' => array(
       'weight' => 10,
       'type' => 'form',
-      'form_id' => 'islandora_scholar_pdf_upload_form',
+      'form_id' => 'islandora_scholar_OBJ_upload_form',
       'module' => 'islandora_scholar',
-      'file' => 'includes/pdf_upload.form.inc',
+      'file' => 'includes/OBJ_upload.form.inc',
     ),
   );
 }
@@ -192,7 +141,7 @@ function islandora_scholar_get_ingest_steps() {
 function islandora_scholar_get_derivatives() {
   $derivatives = array();
   $derivatives[] = array(
-    'source_dsid' => 'PDF',
+    'source_dsid' => 'OBJ',
     'destination_dsid' => 'TN',
     'weight' => '0',
     'function' => array(
@@ -201,7 +150,7 @@ function islandora_scholar_get_derivatives() {
     'file' => drupal_get_path('module', 'islandora_scholar') . '/includes/derivatives.inc',
   );
   $derivatives[] = array(
-    'source_dsid' => 'PDF',
+    'source_dsid' => 'OBJ',
     'destination_dsid' => 'PREVIEW',
     'weight' => '1',
     'function' => array(
@@ -211,7 +160,7 @@ function islandora_scholar_get_derivatives() {
   );
   if (variable_get('islandora_scholar_create_fulltext', TRUE)) {
     $derivatives[] = array(
-      'source_dsid' => 'PDF',
+      'source_dsid' => 'OBJ',
       'destination_dsid' => 'FULL_TEXT',
       'weight' => '2',
       'function' => array(

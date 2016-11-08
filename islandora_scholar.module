@@ -40,15 +40,7 @@ function islandora_scholar_menu() {
       'access arguments' => array(2),
       'file' => 'includes/romeo.tab.inc',
     ),
-    'islandora/object/%islandora_object/islandora_scholar_upload' => array(
-      'title' => 'Document',
-      'type' => MENU_LOCAL_TASK,
-      'page callback' => 'islandora_scholar_upload_view',
-      'page arguments' => array(2),
-      'access callback' => 'islandora_scholar_upload_access',
-      'access arguments' => array(2),
-      'file' => 'includes/upload.tab.inc',
-    ),
+
     'islandora/object/%islandora_object/islandora_scholar_citation' => array(
       'title' => 'Citation',
       'type' => MENU_CALLBACK,
